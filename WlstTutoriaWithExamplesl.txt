@@ -1,0 +1,248 @@
+COMMON_FOR_ALL
+("connect(\'" + adminUserName + "\',\'" + adminPassword + "\',\'" + adminURL + "\')" + NEW_LINE);
+("edit()" + NE_LINE);
+("startEdit()"+NE_LINE);
+===========================
+domainConfigUpdation
+jtaAbandonTimeoutSeconds=86500
+domainCredential=****
+("cd('/JTA/"+domainName+"')"+NEW_LINE);
+("cmo.setAbandonTimeoutSeconds("+jtaAbandonTimeoutSeconds+")"+NEW_LINE);
+("cd('/SecurityConfiguration/"+domainName+"')"+NEW_LINE);
+("cmo.setCredential('"+domainCredential+"')"+NEW_LINE);
+("cd('/Log/"+domainName+"')"+NEW_LINE);
+("cmo.setFileName('"+domainLogFile+"')"+NEW_LINE);			
+("activate()" + NEW_LINE);
+("disconnect()" + NEW_LINE);
+
+============================
+configureSSlAndKeyStore
+
+keyStorePassPhrase=test01
+keyStoreFileName="/keystore/keystore.jks";
+COMMON_PART
+for  i:=1; i<=manageServerCount; i=i+1 
+("cd('/Servers/managed"+i+"_"+domainName+"')"+NEW_LINE);
+("cmo.setKeyStores('CustomIdentityAndCustomTrust')"+NEW_LINE);
+("cmo.setKeyStores('CustomIdentityAndJavaStandardTrust')"+NEW_LINE);
+("cmo.setCustomIdentityKeyStoreFileName('"+keyStoreFileName+"')"+NEW_LINE);
+("cmo.setCustomIdentityKeyStoreType('jks')"+NEW_LINE);
+("cmo.setCustomIdentityKeyStorePassPhrase('"+KeyStorePassPhrase+"')"+NEW_LINE);
+("cmo.setCustomTrustKeyStoreFileName('"+keyStoreFileName+"')"+NEW_LINE);
+("cmo.setCustomTrustKeyStoreType('jks')"+NEW_LINE);
+("cmo.setCustomTrustKeyStorePassPhrase('"+keyStorePassPhrase+"')"+NEW_LINE);
+("cd('/Servers/managed"+i+"_"+domainName+"/SSL/"+"managed"+i+"_"+domainName+"')"+NEW_LINE);	
+//("cmo.setServerPrivateKeyAlias('"+PrivateKeyAlias+"')"+NEW_LINE);
+//("cmo.setServerPrivateKeyPassPhrase('"+PrivateKeyPassPhrase+"')"+NEW_LINE);
+//("cmo.setEnabled(true)"+NEW_LINE);
+//("cmo.setListenPort(7443)"+NEW_LINE);
+end for			
+("activate()"+NEW_LINE);		
+("disconnect()" + NEW_LINE);
+interpreter.exec()
+==============================
+QUOTA_CONFIGURATION
+jmsModuleName = TestJMSModule;
+quotaName=quotaName
+COMMON_PART
+
+("quotaRef=getMBean('/JMSSystemResources/"+jmsModuleName+"/JMSResource/"+jmsModuleName+"/Quotas/"+quotaName+"')"+NEW_LINE);
+("if quotaRef is None:"+NEW_LINE);
+("	cd('/')" + NEW_LINE);
+("	cd('/JMSSystemResources/" + jmsModuleName + "/JMSResource/" + jmsModuleName + "')" + NEW_LINE);
+("	cmo.createQuota('"+quotaName+"')" + NEW_LINE);
+("	cd('/JMSSystemResources/" + jmsModuleName + "/JMSResource/" + jmsModuleName + "/Quotas/"+quotaName+"')" + NEW_LINE);
+("	cmo.setBytesMaximum(9223372036854775806L)" + NEW_LINE);
+("	cmo.setMessagesMaximum(9223372036854775806L)" + NEW_LINE);
+("	cmo.setPolicy('FIFO')" + NEW_LINE);
+("	cmo.setShared(false)" + NEW_LINE);
+("save()" + NEW_LINE);
+("activate()" + NEW_LINE);
+("disconnect()" + NEW_LINE);
+interpreter.exec();
+====================================
+
+
+DISTRIBUTED_QUEUE_CONFIG
+COMMON_PART
+jmsModuleName = JMSModule
+subDeploymentName =TestsubDeploymentName 
+uniformDistributedQueueNames[] = give , seperated UDQNames
+("connect(\'" + adminUserName + "\',\'" + adminPassword + "\',\'" + adminURL + "\')" + NEW_LINE);
+("edit()" + NEW_LINE);
+("startEdit()" + NEW_LINE);
+foreach(String uniformDistributedQueueName : uniformDistributedQueueNames) 
+	("cd('/')" + NEW_LINE);
+	("cd('/JMSSystemResources/" + jmsModuleName + "/JMSResource/" + jmsModuleName + "')" + NEW_LINE);
+	("cmo.createUniformDistributedQueue('" + uniformDistributedQueueName + "')" + NEW_LINE);
+	("cd('/JMSSystemResources/" + jmsModuleName + "/JMSResource/" + jmsModuleName+ "/UniformDistributedQueues/" + uniformDistributedQueueName + "')" + NEW_LINE);
+	("cmo.setMaximumMessageSize(2147483647L)" + NEW_LINE);
+	("cmo.setQuota(getMBean('/JMSSystemResources/"+jmsModuleName+"/JMSResource/"+jmsModuleName+"/Quotas/"+quotaName+"'))" +  NEW_LINE);
+
+	("cd('/JMSSystemResources/" + jmsModuleName + "/JMSResource/" + jmsModuleName+ "/UniformDistributedQueues/" + uniformDistributedQueueName + "')" + NEW_LINE);
+	("set('JNDIName','" + uniformDistributedQueueName + "')" + NEW_LINE);
+	("set('SubDeploymentName','" + subDeploymentName + "')" + NEW_LINE);
+	("cmo.setForwardDelay(600)" + NEW_LINE);
+	("cmo.setLoadBalancingPolicy('Round-Robin')" + NEW_LINE);
+	("cd('/JMSSystemResources/" + jmsModuleName + "/JMSResource/" + jmsModuleName+ "/UniformDistributedQueues/" + uniformDistributedQueueName +"/Thresholds/"+uniformDistributedQueueName+ "')" + NEW_LINE);
+	("cmo.setMessagesLow(9223372036854775807L)" + NEW_LINE);
+	("cmo.setMessagesHigh(9223372036854775807L)" + NEW_LINE);
+	("cmo.setBytesHigh(9223372036854775807L)" + NEW_LINE);
+	("cmo.setBytesLow(9223372036854775807L)" + NEW_LINE);
+end for each
+("save()" + NEW_LINE);
+("activate()" + NEW_LINE);
+("disconnect()" + NEW_LINE);
+interpreter.exec()
+=====================================
+CONNECTION_FACTORY
+
+COMMON_PART
+
+("cd('/')" + NEW_LINE);
+("cd('/JMSSystemResources/" + jmsModuleName + "/JMSResource/" + jmsModuleName + "')"+ NEW_LINE);
+("cmo.createConnectionFactory('" + connectionFactoryName + "')" + NEW_LINE);
+("cd('/JMSSystemResources/" + jmsModuleName + "/JMSResource/" + jmsModuleName+ "/ConnectionFactories/" + connectionFactoryName + "')" + NEW_LINE);
+("cmo.setSubDeploymentName('" + subDeploymentName + "')" + NEW_LINE); 
+("cmo.setDefaultTargetingEnabled(true)"+ NEW_LINE);
+("cmo.setJNDIName('" + connectionFactoryName + "')" + NEW_LINE);
+("cd('/JMSSystemResources/" + jmsModuleName + "/JMSResource/" + jmsModuleName+ "/ConnectionFactories/" + connectionFactoryName + "/SecurityParams/" + connectionFactoryName + "')"+ NEW_LINE);
+("cmo.setAttachJMSXUserId(false)" + NEW_LINE);
+("cd('/JMSSystemResources/" + jmsModuleName + "/JMSResource/" + jmsModuleName+ "/ConnectionFactories/" + connectionFactoryName + "/ClientParams/" + connectionFactoryName + "')"+ NEW_LINE);
+("cmo.setClientIdPolicy('Restricted')" + NEW_LINE);
+("cmo.setSubscriptionSharingPolicy('Exclusive')" + NEW_LINE);
+("cmo.setMessagesMaximum(10)" + NEW_LINE);
+("cd('/JMSSystemResources/" + jmsModuleName + "/JMSResource/" + jmsModuleName+ "/ConnectionFactories/" + connectionFactoryName + "/TransactionParams/" + connectionFactoryName + "')"+ NEW_LINE);
+("cmo.setXAConnectionFactoryEnabled(true)" + NEW_LINE); 
+// OR ::: ("cmo.setXAConnectionFactoryEnabled(false)" + NEW_LINE);
+"cd('/JMSSystemResources/" + jmsModuleName + "/JMSResource/" + jmsModuleName+ "/ConnectionFactories/" + connectionFactoryName + "/LoadBalancingParams/" + connectionFactoryName + "')"+ NEW_LINE);	
+("cmo.setLoadBalancingEnabled(true)"+ NEW_LINE);
+("cmo.setServerAffinityEnabled(false)"+ NEW_LINE);
+("save()" + NEW_LINE);
+("activate()" + NEW_LINE);
+("disconnect()" + NEW_LINE);
+interpreter.exec()
+
+============================
+createJMSServer
+
+("connect(\'" + adminUserName + "\',\'" + adminPassword + "\',\'" + adminURL + "\')" + NEW_LINE);
+("edit()" + NEW_LINE);
+("startEdit()" + NEW_LINE);
+for  i:=1; i<=manageServerCount; i++) 
+
+	("cd('/')" + NEW_LINE);
+	("cmo.createJMSServer('" + "Managed" + i + "_JMSServer')" + NEW_LINE);
+	("cd('/JMSServers/" + "Managed" + i + "_JMSServer')" + NEW_LINE);
+	("cmo.setPersistentStore(getMBean('/FileStores/Managed" + i + "_JMSFileStore'))" + NEW_LINE);
+	("cmo.setTemporaryTemplateResource(None)" + NEW_LINE);
+	("cmo.setTemporaryTemplateName(None)" + NEW_LINE);
+	("cmo.addTarget(getMBean('/Servers/" + "managed" + i + "_" + domainName + "'))" + NEW_LINE);
+end for
+("activate()" + NEW_LINE);
+("disconnect()" + NEW_LINE);
+interpreter.exec();
+================================
+CREATE_FILE_STORE
+
+fileStoreDirectory = "";
+("connect(\'" + adminUserName + "\',\'" + adminPassword + "\',\'" + adminURL + "\')" + NEW_LINE);
+("edit()" + NEW_LINE);
+("startEdit()" + NEW_LINE);
+for  i=1; i<=manageServerCount; i=i+1
+	("cd('/')" + NEW_LINE);
+	("cmo.createFileStore('Managed" + i + "_JMSFileStore')" + NEW_LINE);
+	("cd('/FileStores/Managed" + i + "_JMSFileStore')" + NEW_LINE);
+	("cmo.setDirectory('" + fileStoreDirectory + "')" + NEW_LINE);
+	("set('Targets',jarray.array([ObjectName('com.bea:Name=managed" + i + "_"+ domainName + ",Type=Server')], ObjectName))"
+																											+ NEW_LINE);
+end for
+("activate()" + NEW_LINE);
+("disconnect()" + NEW_LINE);
+interpreter.exec(buf.toString() + NEW_LINE);
+
+CREATE_JMS_MODULE
+for  i:=1; i<=manageServerCount; i=i+1) 
+			trail to sb("ObjectName('com.bea:Name=Managed"+i+"_JMSServer,Type=JMSServer'),");
+end for
+targetedServerForSubDeployment = sb.convertToString().substring(0, sb.convertToString().length() - 1);
+("connect(\'" + adminUserName + "\',\'" + adminPassword + "\',\'" + adminURL + "\')" + NEW_LINE);
+("edit()" + NEW_LINE);
+("startEdit()" + NEW_LINE);
+("cd('/')" + NEW_LINE);
+("cmo.createJMSSystemResource('" + jmsModuleName + "')" + NEW_LINE);
+("cd('/JMSSystemResources/" + jmsModuleName + "')" + NEW_LINE);
+("cmo.addTarget(getMBean('/Clusters/" + domainName + "_cluster" + "'))"+ NEW_LINE);
+("cmo.createSubDeployment('" + subDeploymentName + "')" + NEW_LINE);
+("cd('/JMSSystemResources/" + jmsModuleName + "/SubDeployments/" + subDeploymentName + "')"+ NEW_LINE);
+for  i:1; i<=manageServerCount; i++) 
+	("set('Targets',jarray.array([" + targetedServerForSubDeployment + "], ObjectName))" + NEW_LINE);
+end for
+("cd('/JMSSystemResources/" + jmsModuleName + "')" + NEW_LINE);
+("activate()" + NEW_LINE);
+("disconnect()" + NEW_LINE);
+interpreter.exec();
+
+START_UP_CLASS
+testStartupClass = (String) prop.get("TestStartupClass");
+fullyQualifiedName = (String) prop.get("fullyQualifiedName");
+argument = "logHandlingFileName=/test_dir/" + tesEnvName.toLowerCase() + "/un/properties/test_logHandling";
+COMMON_PART
+("startup_class = getMBean('/StartupClasses/" + testStartupClass + "')" + NEW_LINE);
+("if startup_class == None:" + NEW_LINE);
+("   cmo.createStartupClass('" + testStartupClass + "')" + NEW_LINE);
+("cd('/StartupClasses/" + testStartupClass + "')" + NEW_LINE);
+("cmo.setClassName('" + fullyQualifiedName + "')" + NEW_LINE);
+("set('Targets',jarray.array([ObjectName('com.bea:Name=" + domainName + "_cluster"+ ",Type=Cluster')],ObjectName))"+ NEW_LINE);
+("cmo.setLoadBeforeAppDeployments(true)" + NEW_LINE);
+("cmo.setDeploymentOrder(1000)" + NEW_LINE);
+("cmo.setFailureIsFatal(true)" + NEW_LINE);
+("cmo.setArguments('" + argument + "_" + domainName + ".properties,appServerAddress=" + serverIp + "')" + NEW_LINE);
+("activate()" + NEW_LINE);
+interpreter.exec();
+
+UPDATE_LOGGING_CONFIG
+COMMON_APRT
+("cd('Servers/admin_"+domainName+"/Log/admin_" + domainName + "')" + NEW_LINE);
+("cmo.setFileName('" + serverLogHome + "/admin_" + domainName + ".log')" + NEW_LINE);
+("cmo.setLogFileRotationDir('"+serverLogArchiveHome+"')"+ NEW_LINE);
+("cd('/Servers/admin_" + domainName + "/WebServer/admin_" + domainName + "/WebServerLog/admin_" + domainName + "')"
+("cmo.setLogFileRotationDir('"+accessLogArchiveHome+"')"+ NEW_LINE);
+("cmo.setLogFileFormat('"+accessLogFileFormat+"')"+ NEW_LINE);
+("cmo.setELFFields('"+accessLogFields+"')"+ NEW_LINE);
+("activate()" + NEW_LINE);
+("disconnect()" + NEW_LINE);
+interpreter.exec();
+
+ PythonInterpreter interpreter = null
+		interpreter = new WLSTInterpreter();
+
+
+
+
+
+
+
+===================================================
+Goto your Domain -> Configuration -> General -> Advanced -> Enable RESTful Management Services and restart the Admin Server.
+
+To retrieve all the servers 
+http://localhost:17001/management/tenant-monitoring/servers
+To retrieve the details about the single server
+http://localhost:17001/management/tenant-monitoring/servers/mwiserver1
+
+To retrieve all data sources
+
+http://localhost:17001/management/tenant-monitoring/datasources
+To retrieve information for a specific data source
+
+http://localhost:17001/management/tenant-monitoring/datasources/<datasourcename>
+To retrieve all configured Clusters 
+
+http://localhost:17001/management/tenant-monitoring/clusters
+To retrieve data for a specific Cluster
+
+http://localhost:17001/management/tenant-monitoring/clusters/<clustername>
+
+
+			
