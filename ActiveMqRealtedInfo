@@ -88,3 +88,130 @@ MessageListenerAdapter
  {
 	processMessage(String)
  }
+ 
+ 
+ ====================================================ASYNCH METHOD===============
+ void	send(Destination destination, MessageCreator messageCreator)
+Send a message to the specified destination.
+
+void	send(MessageCreator messageCreator)
+Send a message to the default destination.
+
+void	send(String destinationName, MessageCreator messageCreator)
+Send a message to the specified destination.
+
+Message	sendAndReceive(Destination destination, MessageCreator messageCreator)
+Send a message and receive the reply from the specified destination.
+
+Message	sendAndReceive(MessageCreator messageCreator)
+Send a request message and receive the reply from a default destination.
+
+Message	sendAndReceive(String destinationName, MessageCreator messageCreator)
+Send a message and receive the reply from the specified destination.
+
+void	setDefaultDestination(Destination destination)
+Set the destination to be used on send/receive operations that do not have a destination parameter.
+
+void	setDefaultDestinationName(String destinationName)
+Set the destination name to be used on send/receive operations that do not have a destination parameter.
+
+
+=========================================
+@Nullable
+public Message receive() throws JmsException
+Description copied from interface: JmsOperations
+Receive a message synchronously from the default destination, but only wait up to a specified time for delivery.
+This method should be used carefully, since it will block the thread until the message becomes available or until the timeout value is exceeded.
+This will only work with a default destination specified!
+Specified by:
+receive in interface JmsOperations
+Returns:
+the message received by the consumer, or null if the timeout expires
+Throws:
+JmsException - checked JMSException converted to unchecked
+receive
+
+@Nullable
+public Message receive(Destination destination) throws JmsException
+Description copied from interface: JmsOperations
+Receive a message synchronously from the specified destination, but only wait up to a specified time for delivery.
+This method should be used carefully, since it will block the thread until the message becomes available or until the timeout value is exceeded.
+Specified by:
+receive in interface JmsOperations
+Parameters:
+destination - the destination to receive a message from
+Returns:
+the message received by the consumer, or null if the timeout expires
+Throws:
+JmsException - checked JMSException converted to unchecked
+receive
+
+@Nullable
+public Message receive(String destinationName) throws JmsException
+Description copied from interface: JmsOperations
+Receive a message synchronously from the specified destination, but only wait up to a specified time for delivery.
+This method should be used carefully, since it will block the thread until the message becomes available or until the timeout value is exceeded.
+Specified by:
+receive in interface JmsOperations
+Parameters:
+destinationName - the name of the destination to send this message to (to be resolved to an actual destination by a DestinationResolver)
+Returns:
+the message received by the consumer, or null if the timeout expires
+Throws:
+JmsException - checked JMSException converted to unchecked
+=========================================================================
+receiveSelected
+@Nullable
+public Message receiveSelected(String messageSelector)
+                                  throws JmsException
+Description copied from interface: JmsOperations
+Receive a message synchronously from the default destination, but only wait up to a specified time for delivery.
+This method should be used carefully, since it will block the thread until the message becomes available or until the timeout value is exceeded.
+
+This will only work with a default destination specified!
+
+Specified by:
+receiveSelected in interface JmsOperations
+Parameters:
+messageSelector - the JMS message selector expression (or null if none). See the JMS specification for a detailed definition of selector expressions.
+Returns:
+the message received by the consumer, or null if the timeout expires
+Throws:
+JmsException - checked JMSException converted to unchecked
+receiveSelected
+
+@Nullable
+public Message receiveSelected(Destination destination,@Nullable String messageSelector) throws JmsException
+Description copied from interface: JmsOperations
+Receive a message synchronously from the specified destination, but only wait up to a specified time for delivery.
+This method should be used carefully, since it will block the thread until the message becomes available or until the timeout value is exceeded.
+Specified by:
+receiveSelected in interface JmsOperations
+Parameters:
+destination - the destination to receive a message from
+messageSelector - the JMS message selector expression (or null if none). See the JMS specification for a detailed definition of selector expressions.
+Returns:
+the message received by the consumer, or null if the timeout expires
+Throws:
+JmsException - checked JMSException converted to unchecked
+
+receiveSelected
+@Nullable
+public Message receiveSelected(String destinationName,@Nullable String messageSelector)throws JmsException
+Description copied from interface: JmsOperations
+Receive a message synchronously from the specified destination, but only wait up to a specified time for delivery.
+This method should be used carefully, since it will block the thread until the message becomes available or until the timeout value is exceeded.
+
+Specified by:
+receiveSelected in interface JmsOperations
+Parameters:
+destinationName - the name of the destination to send this message to (to be resolved to an actual destination by a DestinationResolver)
+messageSelector - the JMS message selector expression (or null if none). See the JMS specification for a detailed definition of selector expressions.
+Returns:
+the message received by the consumer, or null if the timeout expires
+Throws:
+JmsException - checked JMSException converted to unchecked
+
+
+ 
+ 
