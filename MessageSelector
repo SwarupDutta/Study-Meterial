@@ -1,0 +1,25 @@
+ private static final String JMS_PAYLOAD_TYPE = "jms_payload_type";
+   private static String jms_payload_type = System.getProperty(JMS_PAYLOAD_TYPE);//-Djms_payload_type=XYZ
+ 
+ 
+   public Message createMessage(Session session) throws JMSException {
+      Message textMessage = session.createTextMessage(this.xmlMessage);
+         
+          if ( jms_payload_type != null ){
+               textMessage.setStringProperty(JMS_PAYLOAD_TYPE,jms_payload_type);
+          }
+         
+    return textMessage;
+  }
+   String message_selector = System.getProperty("jms_payload_type") ?"jms_payload_type".concat("=").concat("'").concat(System.getProperty(JMS_PAYLOAD_TYPE)).concat("'"):  "jms_payload_type IS NULL";
+ 
+ 
+   final DefaultMessageListenerContainer defaultMessageListenerContainer = new DefaultMessageListenerContainer();
+        defaultMessageListenerContainer.setDestinationResolver(dynamicDestinationResolver());
+        defaultMessageListenerContainer.setConnectionFactory(connectionFactory);
+        defaultMessageListenerContainer.setDestinationName(destinationName);
+        defaultMessageListenerContainer.setAutoStartup(Boolean.valueOf(jmsAutoStartup));
+       defaultMessageListenerContainer.setMessageSelector(message_selector);
+        defaultMessageListenerContainer.setMaxConcurrentConsumers(concurrentConsumerCount);
+        defaultMessageListenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumerCount);
+        defaultMessageListenerContainer.setMaxMessagesPerTask(maxMessagePerTask);
