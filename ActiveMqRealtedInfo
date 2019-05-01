@@ -1,0 +1,90 @@
+SPRING INTEGRATION
+=================
+<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+   <property name="connectionFactory" ref="activeMQConnectionFactory"/>
+   <property name="defaultDestinationName" value="${amq.destination}"/>
+
+
+
+
+</bean>
+
+
+<bean id="activeMQConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+   <constructor-arg value="${tcpUrl}"></constructor-arg>
+   <property name="userName" value="${userName}"/>
+   <property name="password" value="${password}"/>
+</bean>
+==========================================ASYNC RECEIVE===================
+DefaultMessageListenerContainer
+{
+
+
+		DefaultMessageListenerContainer defaultMessageListenerContainer = new DefaultMessageListenerContainer();
+        defaultMessageListenerContainer.setDestinationResolver(dynamicDestinationResolver());
+        defaultMessageListenerContainer.setConnectionFactory(connectionFactory());
+        defaultMessageListenerContainer.setDestinationName(destinationName);
+        defaultMessageListenerContainer.setConcurrentConsumers(Integer.parseInt(concurrentConsumer));
+        defaultMessageListenerContainer.setMaxConcurrentConsumers(Integer.parseInt(maxConcurrentConsumer));
+
+        if (null != messageListenerAdapter) {
+            defaultMessageListenerContainer.setMessageListener(messageListenerAdapter);
+        }
+
+        return defaultMessageListenerContainer;
+
+
+}
+
+
+MessageListenerAdapter
+{
+
+
+		MessageListenerAdapter smsAsyncReqMessageListenerAdapter = new MessageListenerAdapter();
+        smsAsyncReqMessageListenerAdapter.setDefaultListenerMethod(listenerMethod);
+        smsAsyncReqMessageListenerAdapter.setDelegate(delegate);
+
+        if (null != messageConverter){
+            smsAsyncReqMessageListenerAdapter.setMessageConverter(messageConverter);
+        }
+
+        return smsAsyncReqMessageListenerAdapter;
+
+
+}
+
+{
+
+	connectionFactory = new ActiveMQConnectionFactory(tcpUrl);
+
+        ActiveMQPrefetchPolicy prefetchPolicy = new ActiveMQPrefetchPolicy();
+        prefetchPolicy.setQueuePrefetch(activeMQQueuePrefetch);
+
+        if (StringUtils.isNotEmpty(activeMQUsername)){
+            connectionFactory.setUserName(activeMQUsername);
+        }
+
+        if (StringUtils.isNotEmpty(activeMQPassword)){
+            connectionFactory.setPassword(activeMQPassword);
+        }
+
+        connectionFactory.setPrefetchPolicy(prefetchPolicy);
+
+        return connectionFactory;
+
+
+}
+{
+
+ return new DynamicDestinationResolver();
+
+}
+
+ return getMessageListenerAdapter("processMessage",asyncJmsListener, return new SimpleMessageConverter());
+ 
+ 
+ asyncJmsListener
+ {
+	processMessage(String)
+ }
