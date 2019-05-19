@@ -1,0 +1,94 @@
+public class A {  
+public void m(){System.out.println("actual business logic");}  
+}
+
+import java.lang.reflect.Method;  
+import org.springframework.aop.MethodBeforeAdvice;  
+public class BeforeAdvisor implements MethodBeforeAdvice{  
+    @Override  
+    public void before(Method method, Object[] args, Object target)throws Throwable {  
+        System.out.println("additional concern before actual logic");  
+        System.out.println("method info:"+method.getName()+" "+method.getModifiers());  
+        System.out.println("argument info:");  
+        for(Object arg:args)  
+            System.out.println(arg);  
+        System.out.println("target Object:"+target);  
+        System.out.println("target object class name: "+target.getClass().getName());  
+    }  
+}  
+
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans  
+    xmlns="http://www.springframework.org/schema/beans"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+    xmlns:p="http://www.springframework.org/schema/p"  
+    xsi:schemaLocation="http://www.springframework.org/schema/beans   
+http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">  
+  
+<bean id="obj" class="A"></bean>  
+<bean id="ba" class="BeforeAdvisor"></bean>  
+  
+<bean id="proxy" class="org.springframework.aop.framework.ProxyFactoryBean">  
+<property name="target" ref="obj"></property>  
+<property name="interceptorNames">  
+<list>  
+<value>ba</value>  
+</list>  
+</property>  
+</bean>  
+  
+</beans> 
+
+The ProxyFactoryBean class is provided by Spring Famework. It contains 2 properties target and interceptorNames. The instance of A class will be considered as target object and the instance of advisor class as interceptor. You need to pass the advisor object as the list object as in the xml file given above.
+
+The ProxyFactoryBean class is written something like this:
+
+public class ProxyFactoryBean{  
+private Object target;  
+private List interceptorNames;  
+//getters and setters  
+} 
+
+Resource r=new ClassPathResource("applicationContext.xml");  
+    BeanFactory factory=new XmlBeanFactory(r);  
+      
+    A a=factory.getBean("proxy",A.class);  
+    a.m();  
+
+
+
+import java.lang.reflect.Method;  
+import org.springframework.aop.AfterReturningAdvice;  
+public class AfterAdvisor implements AfterReturningAdvice{  
+    @Override  
+    public void afterReturning(Object returnValue, Method method,  
+         Object[] args, Object target) throws Throwable {  
+          
+        System.out.println("additional concern after returning advice");  
+    }  
+  
+}  
+
+import org.springframework.aop.ThrowsAdvice;  
+public class ThrowsAdvisor implements ThrowsAdvice{  
+    public void afterThrowing(Exception ex){  
+        System.out.println("additional concern if exception occurs");  
+    }  
+}  
+
+
+3) MethodInterceptor (AroundAdvice) Example
+import org.aopalliance.intercept.MethodInterceptor;  
+import org.aopalliance.intercept.MethodInvocation;  
+public class AroundAdvisor implements MethodInterceptor{  
+  
+    @Override  
+    public Object invoke(MethodInvocation mi) throws Throwable {  
+        Object obj;  
+        System.out.println("additional concern before actual logic");  
+        obj=mi.proceed();  
+        System.out.println("additional concern after actual logic");  
+        return obj;  
+    }  
+  
+}  

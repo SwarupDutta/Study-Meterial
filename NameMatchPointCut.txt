@@ -1,0 +1,70 @@
+NameMatchPOintCutAdivisor
+public class MyBusinessService {
+ 
+    public void runMyBusinessLogic(){
+        System.out.println("************************************");
+        System.out.println("Running business logic...");
+        System.out.println("************************************");
+    }
+     
+    public void testThrowException() {
+        throw new NullPointerException();
+    }
+}
+
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+ 
+public class ExecuteAroundMethod implements MethodInterceptor{
+ 
+    @Override
+    public Object invoke(MethodInvocation metInvocation) throws Throwable {
+         
+        System.out.println("Inside RunBeforeExecution.before() method...");
+        System.out.println("Running before advice...");
+        try{
+            Object result = metInvocation.proceed();
+             
+            System.out.println("Inside RunAfterExecution.afterReturning() method...");
+            System.out.println("Running after advice...");
+             
+            return result;
+        } catch(NullPointerException ne){
+            //this is for ThrowsAdvice
+            throw ne;
+        }
+         
+    }
+ 
+}
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+     
+    <bean id="busService" class="MyBusinessService" />
+    <bean id="aroundAdvice" class="ExecuteAroundMethod" />
+    <bean id="busServiceProxy" class="org.springframework.aop.framework.ProxyFactoryBean" >
+        <property name="target" ref="busService" />
+        <property name="interceptorNames">
+            <list>
+                <value>buServAdvisor</value>
+            </list>
+        </property>
+    </bean>
+     
+    <bean id="buServAdvisor"
+                class="org.springframework.aop.support.NameMatchMethodPointcutAdvisor">
+        <property name="mappedName" value="runMyBusinessLogic" />  
+        <property name="advice" ref="aroundAdvice" />  
+    </bean>
+</beans>
+
+
+ String confFile = "applicationContext.xml";
+        ConfigurableApplicationContext context 
+                                = new ClassPathXmlApplicationContext(confFile);
+        MyBusinessService busServ = (MyBusinessService) context.getBean("busServiceProxy");
+        busServ.runMyBusinessLogic();

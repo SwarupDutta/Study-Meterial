@@ -1,0 +1,52 @@
+<aop:config>
+
+            <aop:pointcut id="testPointCut" expression="execution(* poc.spring.aop.bean.TestClass.issueBook(..))" />
+	    <aop:aspect id="testNotifierOne" ref="testNotifierBeanOne" order="2">
+		<aop:after method="execute" pointcut-ref="testPointCut" />
+	    </aop:aspect>
+
+           
+
+            <aop:aspect id="testNotifierTwo" ref="testNotifierBeanTwo" order="1">
+		<aop:after method="execute" pointcut-ref="testPointCut"/>
+	    </aop:aspect>
+
+</aop:config>
+
+<bean id="testNotifierBeanOne" class="poc.spring.aop.bean.TestNotifierBeanOne"/>
+<bean id="testNotifierBeanTwo" class="poc.spring.aop.bean.TestNotifierBeanTwo"/>
+
+=====================================================================================
+
+ 
+<aop:config>
+
+           	<aop:pointcut id="testPointCut" expression=" execution(* poc.spring.aop.bean.TestClass.issue*(..))" />
+		<aop:advisor pointcut-ref="testPointCut" advice-ref="firstAdvice" order="1" />
+		<aop:advisor pointcut-ref="testPointCut" advice-ref="secondAdvice" order="2" />
+</aop:config>
+
+
+aop:after method signature of advisor public void myadvice(JoinPoint jp)//it is advice    
+aop:after-returning public void myadvice(JoinPoint jp,Object result)//it is advice (after advice) 
+aop:around
+public Object myadvice(ProceedingJoinPoint pjp) throws Throwable   
+    {  
+        System.out.println("Additional Concern Before calling actual method");  
+        Object obj=pjp.proceed();  
+        System.out.println("Additional Concern After calling actual method");  
+        return obj;  
+    } 
+aop:after-throwing 
+public void myadvice(JoinPoint jp,Throwable error)//it is advice  
+
+ 
+
+ 
+
+ 
+
+
+
+           
+
