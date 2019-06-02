@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<context:property-placeholder location="classpath:properties/extra.properties"/>
+
+	<!--<bean class="org.springframework.scheduling.timer.TimerFactoryBean">
+		<property name="scheduledTimerTasks">
+			<list>
+				<ref local="task" />
+			</list>
+		</property>
+	</bean> -->
+
+	<!--<bean class="org.springframework.scheduling.timer.TimerFactoryBean">
+		<property name="scheduledTimerTasks" ref ="task"/>
+	</bean>-->
+
+	<!--<bean id="task" class="org.springframework.scheduling.timer.ScheduledTimerTask">
+		<property name="timerTask" ref="task1" />
+		<property name="delay" value="${delay}" />
+		<property name="period" value="${period}" />
+
+	</bean>-->
+
+	<!--<bean id="task1" class="org.springframework.scheduling.timer.MethodInvokingTimerTaskFactoryBean">
+		<property name="targetObject" ref="task2" />
+		<property name="targetMethod" value="xyz" />
+	</bean>-->
+
+	
+	
+	</bean>-->
+
+
+</beans>
+=========
+<bean class="org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean">
+		<property name="scheduledExecutorTasks">
+			<list>
+				<ref bean="timer" />
+			</list>
+		</property>
+	</bean>
+
+
+	<bean id="timer" class="org.springframework.scheduling.concurrent.ScheduledExecutorTask">
+		<property name="runnable" ref="SchedulerTask" />
+		<property name="delay" value="${delay}" />
+		<property name="period" value="${period}" />
+
+	</bean>
+
+	<bean id="SchedulerTask" class="org.springframework.scheduling.support.MethodInvokingRunnable">
+		<property name="targetObject" ref="TimerTask" />
+		<property name="targetMethod" value="xyz" />
+	</bean>
+
+	<bean id="TimerTask" class="poc.TimerTask">
+	
+	</bean>
