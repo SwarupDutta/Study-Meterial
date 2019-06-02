@@ -1,0 +1,52 @@
+-Doracle.net.tns_admin
+-Doracle.net.wallet_location
+
+<bean id="hikariConfig1" class="com.zaxxer.hikari.HikariConfig">
+
+               
+
+               
+
+                                <property name="jdbcUrl" value="jdbc:oracle:thin:/@<dbase_alias>" />
+
+                                <property name="poolName" value="myDataSourcePool"/>
+
+                                <property name="driverClassName" value="oracle.jdbc.OracleDriver" />
+
+                                <property name="maximumPoolSize" value="15"/>
+
+                                <property name="idleTimeout" value="900000" />
+
+                                <property name="connectionTimeout"><value>${database.connectionTimeout}</value></property>
+
+ 
+
+ 
+
+                </bean>
+
+ 
+
+ 
+
+                <bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
+
+                                <property name="dataSourceProperties" >
+
+                                                <props>
+
+                                                                <prop key="url">${jdbc.url}</prop>
+
+                                                                <prop key="user">${jdbc.datasource.user}</prop>
+
+                                                                <prop key="password">${jdbc.datasource.passwd}</prop>
+
+                                                </props>
+
+                                </property>
+
+                                <property name="dataSourceClassName"
+
+                                                                  value="oracle.jdbc.pool.OracleDataSource" />
+
+                </bean>
