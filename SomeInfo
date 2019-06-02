@@ -1,0 +1,173 @@
+https://www.middlewareinventory.com/blog/active-mq-installation-and-security-setup-and-hardening-step-by-step/
+http://ggl-consulting.blogspot.com/2015/03/activemq-encrypt-activemq-console.html
+
+
+http://bitingcode.blogspot.com/2012/03/asynchronous-hello-activemq-consumer.html
+https://techaffinity.com/blog/java-message-service-jms-using-activemq/
+https://stackoverflow.com/questions/18142830/how-can-i-pull-messages-from-activemq-asynchronously
+To configure HTTP and HTTPS in Spring Boot,
+https://oracle-base.com/articles/10g/secure-external-password-store-10gr2
+http://chamilad.github.io/blog/2015/11/17/creating-a-simple-activemq-master-slash-slave-setup/
+
+
+ https://www.certdepot.net/rhel7-configure-system-forward-email-central-mail-server/
+https://www.cyberciti.biz/faq/linux-unix-start-stop-restart-postfix/
+
+static {
+    HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) ->  true);
+}
+=============SPRING BOOT KEEPING HTTP AND HTTPS BOTH
+http.port=80
+
+server.port=443
+server.ssl.key-store=/home/izeye/keystore
+server.ssl.key-store-password=keystore
+server.ssl.key-password=privatekey
+
+and add an embedded servlet container customer as follows:
+
+@Configuration
+public class TomcatConfig {
+
+    @Value("${http.port}")
+    private int httpPort;
+
+    @Bean
+    public EmbeddedServletContainerCustomizer containerCustomizer() {
+        return new EmbeddedServletContainerCustomizer() {
+            @Override
+            public void customize(ConfigurableEmbeddedServletContainer container) {
+                if (container instanceof TomcatEmbeddedServletContainerFactory) {
+                    TomcatEmbeddedServletContainerFactory containerFactory =
+                            (TomcatEmbeddedServletContainerFactory) container;
+
+                    Connector connector = new Connector(TomcatEmbeddedServletContainerFactory.DEFAULT_PROTOCOL);
+                    connector.setPort(httpPort);
+                    containerFactory.addAdditionalTomcatConnectors(connector);
+                }
+            }
+        };
+    }
+
+}
+=======================REDIRECT TO HTTPS=================
+public ServletWebServerFactory servletContainer() {
+
+        TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory() {
+
+            @Override
+
+            protected void postProcessContext(Context context) {
+
+                SecurityConstraint securityConstraint = new SecurityConstraint();
+
+                securityConstraint.setUserConstraint("CONFIDENTIAL");
+
+                SecurityCollection collection = new SecurityCollection();
+
+                collection.addPattern("/*");
+
+                securityConstraint.addCollection(collection);
+
+                context.addConstraint(securityConstraint);
+
+            }
+
+        };
+
+        tomcat.addAdditionalTomcatConnectors(redirectConnector());
+
+        return tomcat;
+
+    }
+
+ 
+
+    private Connector redirectConnector() {
+
+        Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
+
+        connector.setScheme("http");
+
+        connector.setPort(httpPort);
+
+        connector.setSecure(false);
+
+        connector.setRedirectPort(serverPort);
+
+        return connector;
+
+    }
+    ==========================================REST TEMPLATE CONFIGURATION=======================
+    <bean id="restTemplate"  class="org.springframework.web.client.RestTemplate">
+
+                                <constructor-arg>
+
+                                                <bean class="org.springframework.http.client.HttpComponentsClientHttpRequestFactory">
+
+                                                                <property name="readTimeout" value="1000" />
+
+                                                </bean>
+
+                                </constructor-arg>
+
+                                <property name="messageConverters">
+
+                                                <ref bean="conv" />
+
+                                </property>
+
+                </bean>
+
+               
+
+               
+
+               
+
+               
+
+                <bean id=" conv " class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
+
+                                <property name="marshaller" ref="marshaller" />
+
+                                <property name="unmarshaller" ref=" marshaller " />
+
+                </bean>
+                <bean id=" marshaller " class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+
+                                <property name="classesToBeBound">
+
+                                                <list>
+
+                                                                <value>com.model.b.class</value>
+
+                                                </list>
+
+                                </property>
+
+                </bean>
+                
+                =========================================DEFAULT MESSAGE LISTENER START STOP===============
+                if(!defaultMessageListenerContainer.isActive()){
+    defaultMessageListenerContainer.initialize();
+}
+
+if(!defaultMessageListenerContainer.isRunning()){
+    defaultMessageListenerContainer.start();
+}
+
+ 
+
+ ====================================================
+
+if(defaultMessageListenerContainer.isRunning()){
+    defaultMessageListenerContainer.stop();
+}
+
+if(defaultMessageListenerContainer.isActive()){
+    defaultMessageListenerContainer.shutdown();
+
+
+
+==========================
